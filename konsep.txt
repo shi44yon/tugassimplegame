@@ -1,0 +1,4 @@
+konsep	: pemain diharuskan menebak sebuah kata, frase atau kalimat dengan cara memasukkan sebuah huruf.
+win	: berhasil menebak kata, frase atau kalimat yang dimaksud
+lose	: salah menebak lebih dari 3 kali. huruh yang sudah dimasukan atau masukan yang salah tidak dihitung.
+scoring	: 100 - (30 * jumlah jawaban salah)
