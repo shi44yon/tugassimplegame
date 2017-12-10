@@ -16,35 +16,35 @@ int initialize() {
 	string display[6] = "_","_","R","T","_","R";
 	string guess;
 	
-	if(point == 3){
-		cout<<"Right Answer, Score: "<<live * 30 + 10;
-	}
-	
 	if(live > 0) {
-		cin>>guess;
-		for(int i = 0; i < 6; i++) {
-			if(guess == answer[i]) {
-				if(guess == display[i]) {
-					check = 2;
-					break;
-				}else {
-					display[i] = guess;
-					check = 1;
-					point++;
+		if(point == 3){
+			cout<<"Right Answer, Score: "<<live * 30 + 10;
+		}else {
+			cin>>guess;
+			for(int i = 0; i < 6; i++) {
+				if(guess == answer[i]) {
+					if(guess == display[i]) {
+						check = 2;
+						break;
+					}else {
+						display[i] = guess;
+						check = 1;
+						point++;
+					}
 				}
 			}
+			for(int j = 0; j < 6; j++) {
+				cout<<display[j];
+			}
+			if(check == 0) {
+				live--;
+				cout<<"Wrong Answer, Try Again!";
+			}else if(check == 2) {
+				cout<<"Already Answered, Try Again!";
+			}
+			check = 0;	
 		}
-		for(int j = 0; j < 6; j++) {
-			cout<<display[j];
-		}
-		if(check == 0) {
-			live--;
-			cout<<"Wrong Answer, Try Again!";
-		}else if(check == 2) {
-			cout<<"Already Answered, Try Again!";
-		}
-		check = 0;
 	}else {
-		cout<<"GAME OVER";
+		cout<<"Wrong Answer, GAME OVER";
 	}
 }
