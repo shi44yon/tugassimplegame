@@ -1,50 +1,54 @@
-#include <iostream>
-
-using namespace std;
-
-int initialize();
-
-int main() {
-	initialize();
-}
-
-int initialize() {
-	int live = 3;
-	int check = 0;
-	int point = 0;
-	string answer[6] = "M","A","R","T","Y","R";
-	string display[6] = "_","_","R","T","_","R";
-	string guess;
-	
-	if(live > 0) {
-		if(point == 3){
-			cout<<"Right Answer, Score: "<<live * 30 + 10;
-		}else {
-			cin>>guess;
-			for(int i = 0; i < 6; i++) {
-				if(guess == answer[i]) {
-					if(guess == display[i]) {
-						check = 2;
-						break;
-					}else {
-						display[i] = guess;
-						check = 1;
-						point++;
-					}
-				}
+#include <stdio.h>
+#include<conio.h>
+main() {
+    int i=0;
+    char kata[9]={'k','e','l','e','l','a','w','a','r'};
+    char bintang[9]={'*','*','*','*','*','*','*','*','*'};
+    char tebak;
+    int salah=0,kesempatan=3,menang=0;
+    printf("\n\tGame Tebak Kata\n");
+    printf("\t\n\t#Pertanyaan : \n");
+    printf("\t\tHewan apakah yang memiliki kemampuan ekolokasi ?\n");
+    printf("_____________________________\n\n");
+    while(salah<=3) {
+        if(salah==3) {
+            kesempatan=0;
+            break;
+        }
+        int jumlah_bintang=0;
+        printf ("==> Apakah Jawabannya ? <==\n\n");
+        for(i=0;i<9;i++) {
+            printf("%c ",bintang[i]);
+        }
+		printf("\tKesempatan Menebak Masih %i kali",kesempatan);
+		printf("\n\n");
+		int if_same=0;
+		printf("\tMasukkan Tebakan Anda : ");
+		for(i=0;i<9;i++) {
+			if(bintang[i]=='*') {
+				jumlah_bintang++;
 			}
-			for(int j = 0; j < 6; j++) {
-				cout<<display[j];
-			}
-			if(check == 0) {
-				live--;
-				cout<<"Wrong Answer, Try Again!";
-			}else if(check == 2) {
-				cout<<"Already Answered, Try Again!";
-			}
-			check = 0;	
 		}
-	}else {
-		cout<<"Wrong Answer, GAME OVER";
-	}
+        if(jumlah_bintang==0) {
+            printf("\n\n Selamat jawaban anda benar!\n");
+            printf("\n________Congratulation________");
+            break;
+        }
+        scanf("%c",&tebak);
+        fflush(stdin);
+        for(i=0;i<9;i++) {
+            if(kata[i]==tebak) {
+                bintang[i]=tebak;
+                if_same+=1;
+            }
+        }
+        if(if_same==0) {
+            salah++;
+            kesempatan--;
+        }
+        if (salah==3) {
+            printf("\nMaaf anda harus mencoba lagi !");
+            break;
+       }
+    }
 }
