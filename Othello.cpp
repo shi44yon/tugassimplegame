@@ -1,32 +1,30 @@
-//Bayu Prajanata 4210171014
-//
-//
 #include <iostream>
-#include <windows.h> 
+#include <stdio.h>
+#include <string.h>
+#include <cstdlib>
+
 using namespace std;
 
-#define LIGHTRED 12
+/********************************************************************/
+//Ukuran papan permainan
+const int COLS = 8;//Kolom
+const int ROWS = 8;//Baris
 
-// Board size
-const int ROWS = 8;   
-const int COLS = 8;
-
-// Discs
-const char HUMAN_PLAYER	= 'X';
-const char COMPUTER_PLAYER = 'O';
-
-
-/****************************************************************************/
-
-// Display the board to the screen.
-// [in] board - Game board
-void DisplayBoard(const char board[][COLS]) {
+//Bidak
+const char PLAYER_1 = 'X';
+const char PLAYER_2 = 'O';
+char disc = PLAYER_1;//Set pemain yang bermain di giliran pertama
+char opposing_disc = PLAYER_2;//Set pemain yang bermain di giliran berikutnya
+int endgame = 0;
+/********************************************************************/
+//Memunculkan koordinat papan permainan
+void DrawBoard(const char board[ROWS][COLS]) {
 	cout<<" ";
 	for(int c = 0; c < COLS; c++) {
 		cout<<c;
 	}
 	cout<<endl;
-
+	
 	for(int r = 0; r < ROWS; r++) {
 		cout<<r;
 		for(int c = 0; c < COLS; c++) {
@@ -35,297 +33,251 @@ void DisplayBoard(const char board[][COLS]) {
 		cout<<endl;
 	}
 }
-
-/****************************************************************************/
-
-// Place the disc on the board, flip the discs affected, and
-// return the number of discs flipped.  Note if 0 is returned,
-// the position moved is illegal, and the board is not changed.
-// [in/out] board - Game board
-// [in]	 row   - Row in board to move to
-// [in]	 col   - Col in board to move to
-// [in]	 disc  - Player's disc to be placed (X or O)
-int PlaceDisc(char board[][COLS], int row, int col, char disc) {
+/********************************************************************/
+//Meletakkan bidak
+int PlaceDisc(char board[ROWS][COLS], int row, int col, char *player) {
 	int num_flipped = 0;
-
+	
 	if(board[row][col] != ' ') {
 		return 0;
 	}
-	board[row][col] = disc;
-
-	char opposing_disc;
-	if(disc == HUMAN_PLAYER) {
-		opposing_disc = COMPUTER_PLAYER;
-	}else {
-		opposing_disc = HUMAN_PLAYER;
+	board[row][col] = *player;
+	
+	if(*player == PLAYER_1) {
+		opposing_disc = PLAYER_2;
+	}else if(*player == PLAYER_2) {
+		opposing_disc = PLAYER_1;
 	}
 	
-	// Do we have discs to the right to flip?
+	//Cek bidak di sebelah kiri
 	int disc_pos = -1;
-	for(int c = col + 1; c < COLS && board[row][c] != ' ' && disc_pos == -1; c++) {
-		if(board[row][c] == disc) {
-			disc_pos = c;
-		}
-	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
-	if(disc_pos != -1 && disc_pos > col + 1) {
-		// Flip discs to the right
-		for(int c = col + 1; c < disc_pos; c++) {
-			board[row][c] = disc;
-			num_flipped++;
-		}
-	}
-
-	// Do we have discs to the left to flip?
-	disc_pos = -1;
 	for(int c = col - 1; c >= 0 && board[row][c] != ' ' && disc_pos == -1; c--)	{
-		if(board[row][c] == disc) {
+		if(board[row][c] == *player) {
 			disc_pos = c;
 		}
 	}
-
-	//if (disc_pos > -1) cout << "left disc_pos = " << disc_pos << endl;
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos < col - 1) {
-		// Flip discs to the left
+		//Balik bidak di sebelah kiri
 		for(int c = col - 1; c > disc_pos; c--) {
-			board[row][c] = disc;
+			board[row][c] = *player;
 			num_flipped++;
 		}
 	}
-
-	// Do we have discs above to flip?
+	//Cek bidak di sebelah kanan
+	disc_pos = -1;
+	for(int c = col + 1; c < COLS && board[row][c] != ' ' && disc_pos == -1; c++) {
+		if(board[row][c] == *player) {
+			disc_pos = c;
+		}
+	}
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
+	if(disc_pos != -1 && disc_pos > col + 1) {
+		//Balik bidak di sebelah kanan
+		for(int c = col + 1; c < disc_pos; c++) {
+			board[row][c] = *player;
+			num_flipped++;
+		}
+	}
+	//Cek bidak di atas
 	disc_pos = -1;
 	for(int r = row - 1; r >= 0 && board[r][col] != ' ' && disc_pos == -1; r--) {
-		if(board[r][col] == disc) {
+		if(board[r][col] == *player) {
 			disc_pos = r;
 		}
 	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos < row - 1) {
-		// Flip discs above
+		//Balik bidak di atas
 		for(int r = row - 1; r > disc_pos; r--) {
-			board[r][col] = disc;
+			board[r][col] = *player;
 			num_flipped++;
 		}
 	}
-
-	// Do we have discs below to flip?
+	//Cek bidak di bawah
 	disc_pos = -1;
 	for(int r = row + 1; r < ROWS && board[r][col] != ' ' && disc_pos == -1; r++) {
-		if(board[r][col] == disc) {
+		if(board[r][col] == *player) {
 			disc_pos = r;
 		}
 	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos > row + 1) {
-		// Flip discs below
+		//Balik bidak di bawah
 		for(int r = row + 1; r < disc_pos; r++) {
-			board[r][col] = disc;
+			board[r][col] = *player;
 			num_flipped++;
 		}
 	}
-
-	// Do we have discs diagnally up-left to flip?
+	//Cek bidak di sebelah kiri atas
 	disc_pos = -1;
 	int c = col - 1;
 	for (int r = row - 1; c >= 0 && r >= 0 && board[r][c] != ' ' && disc_pos == -1; r--) {
-		if (board[r][c] == disc) {
+		if (board[r][c] == *player) {
 			disc_pos = r;
 		}
 		c--;
 	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos < row - 1) {
 		c = col - 1;
 		for(int r = row - 1; r > disc_pos; r--) {
-			board[r][c] = disc;
+			board[r][c] = *player;
 			num_flipped++;
 			c--;
 		}
 	}
-
-	// Do we have discs diagnally up-right to flip?
+	//Cek bidak di sebelah kanan atas
 	disc_pos = -1;
 	c = col + 1;
 	for(int r = row - 1; c < COLS && r >= 0 && board[r][c] != ' ' && disc_pos == -1; r--) {
-		if(board[r][c] == disc) {
+		if(board[r][c] == *player) {
 			disc_pos = r;
 		}
 		c++;
 	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos < row - 1) {
 		c = col + 1;
 		for(int r = row - 1; r > disc_pos; r--) {
-			board[r][c] = disc;
+			board[r][c] = *player;
 			num_flipped++;
 			c++;
 		}
 	}
-
-	// Do we have discs diagnally down-left to flip?
+	//Cek bidak di sebelah kiri bawah
 	disc_pos = -1;
 	c = col - 1;
 	for(int r = row + 1; c >= 0 && r < ROWS && board[r][c] != ' ' && disc_pos == -1; r++) {
-		if (board[r][c] == disc) {
+		if(board[r][c] == *player) {
 			disc_pos = r;
 		}
 		c--;
 	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos > row + 1) {
 		c = col - 1;
 		for(int r = row + 1; r < disc_pos; r++) {
-			board[r][c] = disc;
+			board[r][c] = *player;
 			num_flipped++;
 			c--;
 		}
 	}
-
-	// Do we have discs diagnally down-right to flip?
+	//Cek bidak di sebelah kanan bawah
 	disc_pos = -1;
 	c = col + 1;
 	for(int r = row + 1; c < COLS && r < ROWS && board[r][c] != ' ' && disc_pos == -1; r++) {
-		if(board[r][c] == disc) {
+		if(board[r][c] == *player) {
 			disc_pos = r;
 		}
 		c++;
 	}
-
-	// Make sure we found a disc and that it is at least 2 spots away
+	//Pastikan ada bidak yang sama dengan jarak setidaknya 2 petak jauhnya
 	if(disc_pos != -1 && disc_pos > row + 1) {
 		c = col + 1;
 		for(int r = row + 1; r < disc_pos; r++) {
-			board[r][c] = disc;
+			board[r][c] = *player;
 			num_flipped++;
 			c++;
 		}
 	}
-
-	// Reset board if nothing was flipped... illegal move
+	//Reset papan jika tidak ada yang bidak dibalik... illegal move
 	if(num_flipped == 0) {
 		board[row][col] = ' ';
 	}
 	return num_flipped;
 }
-
-/****************************************************************************/
-
-// Check to see if the given player can make a valid move on the game board.
-// Return 1 if a move can be made, 0 otherwise.
-// [in] board  - Game board
-// [in] player - Character representing the player (X or O)
-int MoveIsPossible(const char board[][COLS], char player)
-{
-	return 1;
+/********************************************************************/
+//Ganti giliran pemain
+void ChangePlayerMove(char *player, char *opposing_player) {
+	if(*opposing_player == PLAYER_1) {
+		*player = PLAYER_1;
+	}else if(*opposing_player == PLAYER_2) {
+		*player = PLAYER_2;
+	}
 }
+/********************************************************************/
+//Cek apakah pemain bisa memainkan gillirannya
+int MoveIsPossible(const char board[ROWS][COLS], char *player) {return 1;}
 
-/****************************************************************************/
-
-// Get the human's move (if a legal move is possible) and place it on the board.  
-// [in/out] board - Game board
-void GetHumanMove(char board[][COLS]) {
+//Dapatkan giliran pemain(jika illegal move bisa dilakukan)
+void GetPlayerMove(char board[ROWS][COLS], char *player) {
 	int row, col;
 	bool illegal_move;
-
-	// Make sure there is a legal move that can be made
-	if(MoveIsPossible(board, HUMAN_PLAYER)) {
+	//Cek apakah illegal move bisa dilakukan
+	if(MoveIsPossible(board, &disc)) {
+		cout<<"Giliran Pemain "<<*player<<".\n";
 		do{
 			illegal_move = false;
-
-			cout<<"Row? ";
+			cout<<"Masukan Baris = ";
 			cin>>row;
 			while(row < 0 || row >= ROWS) {
-				cout<<"Please select a row between 0 and "<<(ROWS - 1)<<".\n";
-				cout<<"Row? ";
+				cout<<"Masukan Baris antara 0 sampai "<<(ROWS - 1)<<".\n";
+				cout<<"Maskuan Baris = ";
 				cin>>row;
 			}
-
-			cout<<"Col? ";
+			cout<<"Masukan Kolom = ";
 			cin>>col;
 			while(col < 0 || col >= COLS) {
-				cout<<"Please select a column between 0 and "<<(COLS - 1)<< ".\n";
-				cout<<"Col? ";
+				cout<<"Masukan Kolom antara 0 sampai "<<(COLS - 1)<< ".\n";
+				cout<<"Masukan Kolom = ";
 				cin>>col;
 			}
-
 			if(board[row][col] != ' ') {
-				cout<<"Please select an empty row and column.\n";
-				illegal_move = 1;
+				cout<<"Masukan Baris dan Kolom yang kosong.\n";
+				illegal_move = true;
 			}else {
-				int discs_flipped = PlaceDisc(board, row, col, HUMAN_PLAYER);	
+				int discs_flipped = PlaceDisc(board, row, col, &disc);	
 				if(discs_flipped == 0) {
-					cout<<"Illegal move.\n";
+					cout<<"Illegal Move.\n";
 					illegal_move = true;
-				}else if(discs_flipped == 1) {
-					cout<<"Flipped 1 disc.\n\n";
 				}else {
-					cout<<"Flipped "<<discs_flipped<<" discs.\n\n";
+					cout<<"Pemain "<<*player<<" membalik "<<discs_flipped<<" bidak.\n\n";
 				}
 			}
+			endgame = 0;
 		}while(illegal_move);
 	}else {
-		cout<<"X cannot move.\n";
+		cout<<"Pemain "<<*player<<" tidak bisa memainkan gilirannya.\n";
+		endgame++;
 	}
 }
-
-void SaveBoard(char board[][COLS], char temp_board[][COLS]) {
-	for( int i = 0; i < ROWS; i++) {
-		for(int j =0; j < COLS; j++) {
-			temp_board[i][j]= board[i][j];
-		}
-	}
-}
-
-void GetComputerMove(char board[][COLS]) {
-	char temp_board[ROWS][COLS];
-	int disk_flipped[ROWS][COLS];
-	int temp = 0;
-
-	SaveBoard(board,temp_board);
-
-	for(int i = 0; i< ROWS; i++) {
-		for(int j = 0; j < COLS; j++) {
-			if(board[i][j] != 'X' ||board[i][j] !='O') {
-				disk_flipped[i][j] = PlaceDisc(board,i,j,'O');
+/********************************************************************/
+int GetScore(char board[ROWS][COLS], char player) {
+	int player_score = 0;
+	for(int r = 0; r< ROWS; r++) {
+		for(int c = 0; c < COLS; c++) {
+			if(board[r][c] = player) {
+				player_score++;
 			}
 		}
 	}
+	return player_score;
 }
-
-
+/********************************************************************/
 int main() {
-	//Run these two lines first
-	HANDLE hcolor;
-	hcolor = GetStdHandle (STD_OUTPUT_HANDLE);
 	char board[ROWS][COLS];
-
-	//Use this function to set your colors
-	SetConsoleTextAttribute(hcolor, LIGHTRED);
-
-	// Create a test configuration
-	strncpy(board[0],"		", COLS);
-	strncpy(board[1],"		", COLS);
-	strncpy(board[2],"		", COLS);
+	//Memunculkan papan awal permainan
+	strncpy(board[0],"        ", COLS);
+	strncpy(board[1],"        ", COLS);
+	strncpy(board[2],"        ", COLS);
 	strncpy(board[3],"   OX   ", COLS);
 	strncpy(board[4],"   XO   ", COLS);
-	strncpy(board[5],"		", COLS);
-	strncpy(board[6],"		", COLS);
-	strncpy(board[7],"		", COLS);
-
-	DisplayBoard(board);
-
-	cout<<endl;
+	strncpy(board[5],"        ", COLS);
+	strncpy(board[6],"        ", COLS);
+	strncpy(board[7],"        ", COLS);
+	DrawBoard(board);
 	
-	GetHumanMove(board);
-
-	DisplayBoard(board);
+	//Ulangi terus selama kedua pemain bisa bermain
+	do{
+		GetPlayerMove(board, &disc);
+		system("cls");//Reset layar sebelum menampilkan papan lagi
+		DrawBoard(board);
+		ChangePlayerMove(&disc, &opposing_disc);
+	}while(endgame != 2);
+	
+	//Munculkan skor dan akhiri permainan
+	cout<<"Permainan berakhir"<<endl;
+	cout<<"Skor Pemain X = "<<GetScore(board, PLAYER_1)<<endl;
+	cout<<"Skor Pemain O = "<<GetScore(board, PLAYER_2)<<endl;
 }
